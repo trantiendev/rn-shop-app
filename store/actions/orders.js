@@ -3,9 +3,11 @@ import Order from "../../models/order";
 export const ADD_ORDER = 'ADD_ORDER';
 export const SET_ORDER = 'SET_ORDER';
 
-export const fetchOrders = () => async dispatch => {
+export const fetchOrders = () => async (dispatch, getState) => {
+  const userId = getState().auth.userId
+
   try {
-    const response = await fetch('https://udemy-rn-shop-app.firebaseio.com/orders/u1.json')
+    const response = await fetch(`https://udemy-rn-shop-app.firebaseio.com/orders/${userId}.json`)
 
     if (!response.ok) throw new Error('Something went wrong!')
 
@@ -31,9 +33,11 @@ export const fetchOrders = () => async dispatch => {
   }
 }
 
-export const addOrder = (cartItems, totalAmount) =>  async dispatch => {
+export const addOrder = (cartItems, totalAmount) =>  async (dispatch, getState) => {
   const date = new Date()
-  const response = await fetch('https://udemy-rn-shop-app.firebaseio.com/orders/u1.json', {
+  const token = getState().auth.token
+  const userId = getState().auth.userId
+  const response = await fetch(`https://udemy-rn-shop-app.firebaseio.com/orders/${userId}.json?auth=${token}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -50,6 +54,6 @@ export const addOrder = (cartItems, totalAmount) =>  async dispatch => {
   const resData = await response.json()
   dispatch({
     type: ADD_ORDER,
-    orderData: {id: resData.name, items: cartItems, amount: totalAmount, date: date }
+    orderData: {id: resData.name, items: cartItems, amount: totalAmount, date }
   })
 };
